@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/MsPacManEngine"/>
+	<classpathentry kind="lib" path="lib/ici-c2021-practica2.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2122-practica1.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2122-practica2.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2223-practica1.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2223-practica2.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2324-practica1.jar"/>
+	<classpathentry kind="lib" path="lib/ici-c2324-practica2.jar"/>
+	<classpathentry kind="lib" path="lib/ici-2425-practica1.jar"/>
+	<classpathentry kind="lib" path="lib/ici-2425-practica2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica0"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica1"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica2"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica3"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica4"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
