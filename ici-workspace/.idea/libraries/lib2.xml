@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="lib2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-c2223-practica2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-c2122-practica1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-c2122-practica2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-c2324-practica2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-c2324-practica1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-2425-practica1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-2425-practica2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-c2021-practica2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/ici-c2223-practica1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
