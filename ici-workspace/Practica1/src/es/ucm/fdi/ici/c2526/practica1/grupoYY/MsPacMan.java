@@ -17,100 +17,123 @@ public class MsPacMan extends PacmanController{
     public MOVE getMove(Game game, long timeDue)
     {
         int pacman = game.getPacmanCurrentNodeIndex();
-        boolean[] visited = new boolean[game.getNumberOfNodes()];
+        Constants.MOVE[] moves = game.getPossibleMoves(pacman, game.getPacmanLastMoveMade());
+        if (moves == null || moves.length == 0) return MOVE.NEUTRAL;
 
-        if(game.isJunction(pacman))
+        int nearestGhost = getNearestGhostToNode(Float.MAX_VALUE, pacman, game);
+        if (nearestGhost == -2)
         {
-            Constants.MOVE[] m = game.getPossibleMoves(pacman, game.getPacmanLastMoveMade());
-
-            float max = Float.MAX_VALUE;
-            int c = 0;
-
-            int ghost = getNearestGhost(max, game);
-
-            if (ghost == -2)
+            int nearestPill = getNearestPill(game);
+            if (nearestPill >= 0)
             {
-                int nearestPill = getNearestPill(game);
-
-                return game.getApproximateNextMoveTowardsTarget(
-                        game.getPacmanCurrentNodeIndex(),
-                        nearestPill,
-                        game.getPacmanLastMoveMade(),
-                        Constants.DM.PATH);
-            }
-
-            for(int i = 0; i < m.length; i++)
+                return game.getApproximateNextMoveTowardsTarget(pacman, nearestPill, game.getPacmanLastMoveMade(), Constants.DM.PATH);
+            } else
             {
-                int next = nextJunction(game, visited);
-
-                float gp = game.getShortestPathDistance(ghost, pacman);
-                float gc = game.getShortestPathDistance(ghost, next);
-                float d = game.getShortestPathDistance(pacman, next);
-
-                float h = (d / gc) * gp;
-                if(h < max)
-                {
-                    max = h;
-                    c = next;
-                }
+                return MOVE.NEUTRAL;
             }
-
-            GameView.addPoints(
-                    game,
-                    Color.yellow,
-                    game.getShortestPath(
-                            c,
-                            game.getPacmanCurrentNodeIndex()));
-
-            return game.getApproximateNextMoveTowardsTarget(
-                    game.getPacmanCurrentNodeIndex(),
-                    c,
-                    game.getPacmanLastMoveMade(),
-                    Constants.DM.PATH);
-
         }
 
-        return MOVE.NEUTRAL;
+        float max = Float.MAX_VALUE;
+        int c = 0;
+        MOVE bestMove = MOVE.NEUTRAL;
+
+        for (MOVE move : moves)
+        {
+            int next = firstJunctionFrom(game.getNeighbour(pacman, move), pacman, game);
+            int ghostToJunction = getNearestGhostToNode(Float.MAX_VALUE, next, game);
+
+            float gc = (float) 1 / game.getShortestPathDistance(ghostToJunction, next);
+
+            float d = game.getShortestPathDistance(pacman, next);
+
+            int degree = game.getPossibleMoves(next).length-1;
+
+            int[] path = game.getShortestPath(pacman, next);
+            int pillsOnPath = countAvailablePillsOnPath(game, path);
+
+            float ALPHA_THREAT = 1.5f;   // peso amenaza fantasma
+            float BETA_DEGREE = 0.5f;    // beneficio por grado del junction
+            float GAMMA_PILLS_PATH = 4.0f; // recompensa por pills en el camino
+
+            float score = d + ALPHA_THREAT * gc - BETA_DEGREE * degree - GAMMA_PILLS_PATH * pillsOnPath;
+
+            float REVERSE_PENALTY = 2.0f;
+            if (move == game.getPacmanLastMoveMade().opposite()) {
+                score += REVERSE_PENALTY;
+            }
+
+            if (score <= max)
+            {
+                max = score;
+                c = next;
+                bestMove = move;
+            }
+        }
+
+        GameView.addPoints(
+                game,
+                Color.yellow,
+                game.getShortestPath(
+                        c,
+                        game.getPacmanCurrentNodeIndex()));
+
+        return bestMove;
     }
     
     public String getName() {
     	return "MsPacManNeutral";
     }
 
-    private int nextJunction(Game game, boolean[] visited)
+    private int countAvailablePillsOnPath(Game game, int[] path)
     {
-        int pacman = game.getPacmanCurrentNodeIndex();
+        if (path == null || path.length == 0) return 0;
 
-        Stack<int[]> stack = new Stack<>();
-
-        stack.push(new int[]{pacman, -1});
-        visited[pacman] = true;
-
-        while (!stack.isEmpty())
+        int count = 0;
+        for (int node : path)
         {
-            int[] currentPair = stack.pop();
-            int current = currentPair[0];
-            int parent = currentPair[1];
+            int pillIndex = game.getPillIndex(node);
+            if (pillIndex != -1 && Boolean.TRUE.equals(game.isPillStillAvailable(pillIndex))) count++;
+            int powerPillIndex = game.getPowerPillIndex(node);
+            if (powerPillIndex != -1 && Boolean.TRUE.equals(game.isPowerPillStillAvailable(powerPillIndex))) count++;
+        }
 
-            if(game.isJunction(current)) return current;
+        return count;
+    }
+
+    private int firstJunctionFrom(int node, int parent, Game game)
+    {
+        int current = node;
+        int prev = parent;
+
+        int steps = 0;
+        int maxSteps = game.getNumberOfNodes();
+
+        while (steps < maxSteps)
+        {
+            if (game.isJunction(current)) return current;
 
             int[] neighbours = game.getNeighbouringNodes(current);
-            for (int neighbour : neighbours)
+            int next = -1;
+            for (int n : neighbours)
             {
-                if (!visited[neighbour])
+                if (n != prev)
                 {
-                    if (neighbour != parent) {
-                        visited[neighbour] = true;
-                        stack.push(new int[]{neighbour, current});
-                    }
+                    next = n;
+                    break;
                 }
             }
+
+            prev = current;
+            current = next;
+
+            steps++;
         }
 
         return -2;
     }
 
-    private int getNearestGhost(float limit, Game game)
+
+    private int getNearestGhostToNode(float limit, int n, Game game)
     {
         int nearestGhost = -2;
 
@@ -119,8 +142,7 @@ public class MsPacMan extends PacmanController{
             if(game.getGhostLairTime(ghost) <= 0)
             {
                 int ghostNode = game.getGhostCurrentNodeIndex(ghost);
-                int pacmanNode = game.getPacmanCurrentNodeIndex();
-                float dis = game.getShortestPathDistance(ghostNode, pacmanNode);
+                float dis = game.getShortestPathDistance(ghostNode, n);
 
                 if (dis < limit) {
                     limit = dis;
