@@ -31,43 +31,52 @@ public class MsPacMan extends PacmanController{
             }
         }
 
+        return getMoveToBestJunction(8.0f, 0.0f, 12.5f, 15.0f, pacman, game);
+    }
+    
+    public String getName() {
+    	return "MsPacManNeutral";
+    }
+
+    private MOVE getMoveToBestJunction(float alpha, float beta, float gamma, float delta, int pacman, Game game)
+    {
         float max = Float.MAX_VALUE;
         int c = 0;
-        int g = 0;
         MOVE bestMove = MOVE.NEUTRAL;
 
         Constants.MOVE[] moves = game.getPossibleMoves(pacman, game.getPacmanLastMoveMade());
         if (moves == null || moves.length == 0) return MOVE.NEUTRAL;
         for (MOVE move : moves)
         {
-            int next = firstJunctionFrom(game.getNeighbour(pacman, move), pacman, game);
-            int ghostToJunction = getNearestGhostToNode(Float.MAX_VALUE, next, game);
+            int moveNode = game.getNeighbour(pacman, move);
+            int possibleJunctionNode = firstJunctionFrom(moveNode, pacman, game);
+            int ghostToJunction = getNearestGhostToNode(Float.MAX_VALUE, possibleJunctionNode, game);
 
-            float gc = 1 / (game.getShortestPathDistance(ghostToJunction, next) + 0.1f);
+            float gm = game.getShortestPathDistance(ghostToJunction, moveNode);
 
-            float d = game.getShortestPathDistance(pacman, next);
+            float gc = game.getShortestPathDistance(ghostToJunction, possibleJunctionNode);
+            float threat = 1 / (gc + 0.1f);
 
-            int degree = game.getPossibleMoves(next).length - 1;
+            float d = game.getShortestPathDistance(pacman, possibleJunctionNode);
 
-            int[] path = game.getShortestPath(pacman, next);
+            int degree = game.getPossibleMoves(possibleJunctionNode).length - 1;
+
+            int[] path = game.getShortestPath(pacman, possibleJunctionNode);
             int pillsOnPath = countAvailablePillsOnPath(game, path);
 
-            float ALPHA_THREAT = 3.0f;   // peso amenaza fantasma
-            float BETA_DEGREE = 0.5f;    // beneficio por grado del junction
-            float GAMMA_PILLS_PATH = 4.0f; // recompensa por pills en el camino
+            float safety = (d + 0.1f) / (gc + 0.1f);
+            float score = (d / gc) * 8.0f + alpha * threat - beta * degree - gamma * pillsOnPath + 1.0f / (gm + 0.1f);
 
-            float score = d / ALPHA_THREAT * gc + ALPHA_THREAT * gc - BETA_DEGREE * degree - GAMMA_PILLS_PATH * pillsOnPath;
             if (pillsOnPath == 0) {
                 int nearestPill = getNearestPill(game);
-                float dist = game.getShortestPathDistance(next, nearestPill);
-                score -= 1.0f / (dist + 0.1f); // cuanto más lejos, menos atractivo
+                float dist = game.getShortestPathDistance(possibleJunctionNode, nearestPill);
+                score -= delta / (dist + 0.1f);
             }
 
             if (score <= max)
             {
                 max = score;
-                c = next;
-                g = ghostToJunction;
+                c = possibleJunctionNode;
                 bestMove = move;
             }
         }
@@ -80,10 +89,6 @@ public class MsPacMan extends PacmanController{
                         game.getPacmanCurrentNodeIndex()));
 
         return bestMove;
-    }
-    
-    public String getName() {
-    	return "MsPacManNeutral";
     }
 
     private int countAvailablePillsOnPath(Game game, int[] path)
