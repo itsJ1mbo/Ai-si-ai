@@ -17,8 +17,6 @@ public class MsPacMan extends PacmanController{
     public MOVE getMove(Game game, long timeDue)
     {
         int pacman = game.getPacmanCurrentNodeIndex();
-        Constants.MOVE[] moves = game.getPossibleMoves(pacman, game.getPacmanLastMoveMade());
-        if (moves == null || moves.length == 0) return MOVE.NEUTRAL;
 
         int nearestGhost = getNearestGhostToNode(Float.MAX_VALUE, pacman, game);
         if (nearestGhost == -2)
@@ -35,37 +33,41 @@ public class MsPacMan extends PacmanController{
 
         float max = Float.MAX_VALUE;
         int c = 0;
+        int g = 0;
         MOVE bestMove = MOVE.NEUTRAL;
 
+        Constants.MOVE[] moves = game.getPossibleMoves(pacman, game.getPacmanLastMoveMade());
+        if (moves == null || moves.length == 0) return MOVE.NEUTRAL;
         for (MOVE move : moves)
         {
             int next = firstJunctionFrom(game.getNeighbour(pacman, move), pacman, game);
             int ghostToJunction = getNearestGhostToNode(Float.MAX_VALUE, next, game);
 
-            float gc = (float) 1 / game.getShortestPathDistance(ghostToJunction, next);
+            float gc = 1 / (game.getShortestPathDistance(ghostToJunction, next) + 0.1f);
 
             float d = game.getShortestPathDistance(pacman, next);
 
-            int degree = game.getPossibleMoves(next).length-1;
+            int degree = game.getPossibleMoves(next).length - 1;
 
             int[] path = game.getShortestPath(pacman, next);
             int pillsOnPath = countAvailablePillsOnPath(game, path);
 
-            float ALPHA_THREAT = 1.5f;   // peso amenaza fantasma
+            float ALPHA_THREAT = 3.0f;   // peso amenaza fantasma
             float BETA_DEGREE = 0.5f;    // beneficio por grado del junction
             float GAMMA_PILLS_PATH = 4.0f; // recompensa por pills en el camino
 
-            float score = d + ALPHA_THREAT * gc - BETA_DEGREE * degree - GAMMA_PILLS_PATH * pillsOnPath;
-
-            float REVERSE_PENALTY = 2.0f;
-            if (move == game.getPacmanLastMoveMade().opposite()) {
-                score += REVERSE_PENALTY;
+            float score = d / ALPHA_THREAT * gc + ALPHA_THREAT * gc - BETA_DEGREE * degree - GAMMA_PILLS_PATH * pillsOnPath;
+            if (pillsOnPath == 0) {
+                int nearestPill = getNearestPill(game);
+                float dist = game.getShortestPathDistance(next, nearestPill);
+                score -= 1.0f / (dist + 0.1f); // cuanto más lejos, menos atractivo
             }
 
             if (score <= max)
             {
                 max = score;
                 c = next;
+                g = ghostToJunction;
                 bestMove = move;
             }
         }
