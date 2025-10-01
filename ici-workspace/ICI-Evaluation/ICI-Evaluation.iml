@@ -8,5 +8,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="MsPacManEngine" />
+    <orderEntry type="module" module-name="Practica1" />
+    <orderEntry type="module" module-name="Practica0" />
   </component>
 </module>
