@@ -5,6 +5,7 @@ import pacman.game.Constants;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 import pacman.game.GameView;
+import pacman.game.internal.Ghost;
 
 import java.awt.*;
 import java.util.LinkedList;
@@ -18,8 +19,8 @@ public class MsPacMan extends PacmanController{
     {
         int pacman = game.getPacmanCurrentNodeIndex();
 
-        int nearestGhost = getNearestGhostToNode(Float.MAX_VALUE, pacman, game);
-        if (nearestGhost == -2)
+        Constants.GHOST ghost = getNearestGhostToNode(Float.MAX_VALUE, pacman, game);
+        if (ghost == null)
         {
             int nearestPill = getNearestPill(game);
             if (nearestPill >= 0)
@@ -31,7 +32,9 @@ public class MsPacMan extends PacmanController{
             }
         }
 
-        return getMoveToBestJunction(8.0f, 0.0f, 12.5f, 15.0f, pacman, game);
+        if (!game.isJunction(pacman)) return MOVE.NEUTRAL;
+
+        return getMoveToBestJunction(100.0f, 0.0f, 12.0f, 17.0f, pacman, game);
     }
     
     public String getName() {
@@ -42,6 +45,7 @@ public class MsPacMan extends PacmanController{
     {
         float max = Float.MAX_VALUE;
         int c = 0;
+        int f = 0;
         MOVE bestMove = MOVE.NEUTRAL;
 
         Constants.MOVE[] moves = game.getPossibleMoves(pacman, game.getPacmanLastMoveMade());
@@ -50,11 +54,17 @@ public class MsPacMan extends PacmanController{
         {
             int moveNode = game.getNeighbour(pacman, move);
             int possibleJunctionNode = firstJunctionFrom(moveNode, pacman, game);
-            int ghostToJunction = getNearestGhostToNode(Float.MAX_VALUE, possibleJunctionNode, game);
 
-            float gm = game.getShortestPathDistance(ghostToJunction, moveNode);
+            Constants.GHOST ghost = getNearestGhostToNode(Float.MAX_VALUE, possibleJunctionNode, game);
+            int ghostToJunctionNode = game.getGhostCurrentNodeIndex(ghost);
 
-            float gc = game.getShortestPathDistance(ghostToJunction, possibleJunctionNode);
+            float gm = game.getShortestPathDistance(ghostToJunctionNode, moveNode);
+
+            float gc = game.getShortestPathDistance(ghostToJunctionNode, possibleJunctionNode);
+            if(game.isGhostEdible(ghost))
+            {
+                gc *= -1;
+            }
             float threat = 1 / (gc + 0.1f);
 
             float d = game.getShortestPathDistance(pacman, possibleJunctionNode);
@@ -65,9 +75,14 @@ public class MsPacMan extends PacmanController{
             int pillsOnPath = countAvailablePillsOnPath(game, path);
 
             float safety = (d + 0.1f) / (gc + 0.1f);
-            float score = (d / gc) * 8.0f + alpha * threat - beta * degree - gamma * pillsOnPath + 1.0f / (gm + 0.1f);
+            float score = (d / gc) * 8.0f
+                    + alpha * threat
+                    - beta * degree
+                    - gamma * pillsOnPath
+                    + 1.0f / (gm + 0.1f);
 
-            if (pillsOnPath == 0) {
+            if (pillsOnPath == 0)
+            {
                 int nearestPill = getNearestPill(game);
                 float dist = game.getShortestPathDistance(possibleJunctionNode, nearestPill);
                 score -= delta / (dist + 0.1f);
@@ -77,6 +92,7 @@ public class MsPacMan extends PacmanController{
             {
                 max = score;
                 c = possibleJunctionNode;
+                f = ghostToJunctionNode;
                 bestMove = move;
             }
         }
@@ -87,6 +103,13 @@ public class MsPacMan extends PacmanController{
                 game.getShortestPath(
                         c,
                         game.getPacmanCurrentNodeIndex()));
+
+        GameView.addPoints(
+                game,
+                Color.red,
+                game.getShortestPath(
+                        f,
+                        c));
 
         return bestMove;
     }
@@ -140,9 +163,9 @@ public class MsPacMan extends PacmanController{
     }
 
 
-    private int getNearestGhostToNode(float limit, int n, Game game)
+    private Constants.GHOST getNearestGhostToNode(float limit, int n, Game game)
     {
-        int nearestGhost = -2;
+        Constants.GHOST nearestGhost = null;
 
         for(Constants.GHOST ghost : Constants.GHOST.values())
         {
@@ -153,7 +176,7 @@ public class MsPacMan extends PacmanController{
 
                 if (dis < limit) {
                     limit = dis;
-                    nearestGhost = ghostNode;
+                    nearestGhost = ghost;
                 }
             }
         }
