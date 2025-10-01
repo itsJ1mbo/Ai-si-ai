@@ -1,6 +1,7 @@
 package es.ucm.fdi.ici.c2526.practica1.grupoYY;
 
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedList;
@@ -51,12 +52,17 @@ public final class Ghosts extends GhostController {
 
                         // esto no me gusta lol
                         //int[] junctions = new int[0];
-                        ArrayList<Integer> junctions = new ArrayList<Integer>();
-                        int junction = predictPacmanTarget(game, 2, 0, junctions);
+                        ArrayList<ArrayList<Integer>> junctions = new ArrayList<ArrayList<Integer>>();
+                        MOVE lastMove = game.getPacmanLastMoveMade();
+
+                        int pm = game.getPacmanCurrentNodeIndex();
+                        int junction = predictPacmanTarget(game, 3, 0, pm, lastMove,  junctions);
                         //target = junction;
                         //int sp = game.getShortestPathDistance();
 
-                        MOVE m = game.getApproximateNextMoveTowardsTarget(g, junction,
+                        //int best_junction = getBestJunction(game, junctions, 2, ghost);
+                        //target = best_junction;
+                        MOVE m = game.getApproximateNextMoveTowardsTarget(g, target,
                                 game.getGhostLastMoveMade(ghost), Constants.DM.PATH);
 
                         moves.put(ghost, m);
@@ -102,59 +108,61 @@ public final class Ghosts extends GhostController {
 
     // es el metodo del jimbo methinks pero es que no me va asi que lol lmao
     // pone en orden (¿?) las posiciones a las que cree que puede ir
-    private int predictPacmanTarget(Game game, int depth, int count, ArrayList<Integer> junctions){
+    private int predictPacmanTarget(Game game, int depth, int count, int initialNode, MOVE lastMove,
+                                    ArrayList<ArrayList<Integer>> junctions){
 
-        int pm = game.getPacmanCurrentNodeIndex();
+        if(count >= depth-1){
+            return 0;
+        }
 
-        MOVE[] moves = game.getPossibleMoves(pm, game.getPacmanLastMoveMade());
+        if(initialNode == -1){
+            return 0;
+        }
+        boolean aux = game.isJunction(initialNode);
 
-        int current = pm;
+        MOVE[] moves = game.getPossibleMoves(initialNode, lastMove);
+
+        int current = initialNode;
         int prev = current;
 
         int j = 0;
 
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        ArrayList<MOVE> move_list = new ArrayList<MOVE>();
+
         // -------------------------- TARGET ---------------------------------
         // recorre los movimientos posibles para encontrar la interseccion final
         for(MOVE move : moves){
+            int junct = getNextJunction(game, current, move);
+            list.add(junct);
+            move_list.add(move);
 
-            int steps = 0;
-            int maxSteps = game.getNumberOfNodes();
-
-            boolean found = false;
-            while(steps < maxSteps && !found){
-
-                // si el nodo es vaildo
-                if(current > -1) {
-                    // si es una interseccion
-                    if (game.isJunction(current)) {
-                        // cada posible direccion del pacman es una posible solucion del fantasma
-                        junctions.add(current);
-                        j++;
-                        found = true;
-                    }
-
-                    // siguiente nodo en esa direccion/movimiento
-                    int next = game.getNeighbour(current, move);
-                    prev = current;
-                    current = next;
-                    steps++;
-                }
-                else {
-                    // cada posible direccion del pacman es una posible solucion del fantasma
-                    junctions.add(prev);
-                    j++;
-                    found = true;
-                }
-            }
-
-
-            // recursividad aqui
-            int b = 0;
-
-            if(count+1 < depth){
-                int a = predictPacmanTarget(game, depth, ++count, junctions);
-            }
+            int a = predictPacmanTarget(game, depth, count + 1,
+                    junct, move, junctions);
         }
+
+        junctions.add(list);
+
+
+
+        // recorre todas las intersecciones de la profundidad count
+//        for(int i = 0; i<junctions.get(count).size(); i++){
+//            int a = predictPacmanTarget(game, depth, count + 1,
+//                    junctions.get(count).get(i), move_list.get(i), junctions);
+//
+//        }
+
+//
+//        if(count+1 < depth && current > -1){
+//            for(int i = 0; i<junctions.get(count).size(); i++){
+//                MOVE move = move_list.get(i);
+//                int c = count + 1;
+//                // junctions.get(count).get(i)
+//                int a = predictPacmanTarget(game, depth, c, current, move, junctions);
+//            }
+//        }
+
+
 
 //        // recursividad segun la profundiad (cuantas junctions hacia delante quieres 'predecir')
 //        if(count+1 < depth){
@@ -167,23 +175,74 @@ public final class Ghosts extends GhostController {
 //            }
 //        }
 
-        return junctions.get(0);
+        return 0;
     }
 
 
+    private int getNextJunction(Game game, int init, MOVE move)
+    {
+        int steps = 0;
+        int maxSteps = game.getNumberOfNodes();
+
+        int current = init;
+        int prev = init;
+        boolean found = false;
+
+        while(steps < maxSteps && !found){
+
+            // si el nodo es vaildo
+            if(current > -1) {
+                // si es una interseccion
+                if (game.isJunction(current)) {
+                    // cada posible direccion del pacman es una posible solucion del fantasma
+                    found = true;
+                }
+                else {
+                    // siguiente nodo en esa direccion/movimiento
+                    int next = game.getNeighbour(current, move);
+                    prev = current;
+                    current = next;
+                    steps++;
+                }
+            }
+            else {
+                // cada posible direccion del pacman es una posible solucion del fantasma
+                found = true;
+            }
+        }
+        return current;
+    }
+
     // puaj
-    private int possibleMovesWithDepth(Game game, int depth, int initial){
-        int count = 0;
-        int i = 0;
+    // LKWFHLKSUDBFÑLSDHFSÑLEF AQUI
+    private int getBestJunction(Game game, ArrayList<ArrayList<Integer>> junctions,
+                                int depth, GHOST ghost){
+        int junct = 0;
+        int shortest_dist = 0;
 
-        while(i < depth){
-
-
-            i++;
+        // si el nivel de profundiad es demasiado se queda solo con el maximo
+        if(depth > junctions.size()){
+            depth = junctions.size();
+            //return game.getPacmanCurrentNodeIndex();
         }
 
 
-        return count;
+        ArrayList<Integer> list = junctions.get(depth - 1);
+
+
+        junct = list.getFirst();
+        shortest_dist = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), junct);
+
+        for(int i = 1; i<list.size(); i++){
+            int dist = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), list.get(i));
+
+            if(dist < shortest_dist){
+                shortest_dist = dist;
+                junct = list.get(i);
+            }
+        }
+
+        return junct;
     }
     // guarrada de placeholder
     private int firstJunctionFrom(int node, int parent, Game game)
