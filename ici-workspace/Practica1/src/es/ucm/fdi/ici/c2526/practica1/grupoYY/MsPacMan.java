@@ -34,7 +34,7 @@ public class MsPacMan extends PacmanController{
 
         if (!game.isJunction(pacman)) return MOVE.NEUTRAL;
 
-        return getMoveToBestJunction(250.0f, 0.0f, 20.0f, 20.0f, pacman, game);
+        return getMoveToBestJunction(250.0f, 0.0f, 20.0f, 50.0f, pacman, game);
     }
     
     public String getName() {
@@ -63,7 +63,7 @@ public class MsPacMan extends PacmanController{
             float gc = game.getShortestPathDistance(ghostToJunctionNode, possibleJunctionNode);
             if(game.isGhostEdible(ghost))
             {
-                gc *= -0.5f * ((4 % edibleGhosts(game)) + 1);
+                gc *= -0.1f * ((4 % edibleGhosts(game)) + 1);
             }
             float threat = 1 / (gc + 0.1f);
 
