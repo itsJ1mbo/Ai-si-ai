@@ -34,7 +34,7 @@ public class MsPacMan extends PacmanController{
 
         if (!game.isJunction(pacman)) return MOVE.NEUTRAL;
 
-        return getMoveToBestJunction(100.0f, 0.0f, 12.0f, 17.0f, pacman, game);
+        return getMoveToBestJunction(250.0f, 0.0f, 20.0f, 20.0f, pacman, game);
     }
     
     public String getName() {
@@ -58,12 +58,12 @@ public class MsPacMan extends PacmanController{
             Constants.GHOST ghost = getNearestGhostToNode(Float.MAX_VALUE, possibleJunctionNode, game);
             int ghostToJunctionNode = game.getGhostCurrentNodeIndex(ghost);
 
-            float gm = game.getShortestPathDistance(ghostToJunctionNode, moveNode);
+            float gm = game.getShortestPathDistance(ghostToJunctionNode, moveNode, game.getGhostLastMoveMade(ghost));
 
             float gc = game.getShortestPathDistance(ghostToJunctionNode, possibleJunctionNode);
             if(game.isGhostEdible(ghost))
             {
-                gc *= -1;
+                gc *= -0.5f * ((4 % edibleGhosts(game)) + 1);
             }
             float threat = 1 / (gc + 0.1f);
 
@@ -74,7 +74,6 @@ public class MsPacMan extends PacmanController{
             int[] path = game.getShortestPath(pacman, possibleJunctionNode);
             int pillsOnPath = countAvailablePillsOnPath(game, path);
 
-            float safety = (d + 0.1f) / (gc + 0.1f);
             float score = (d / gc) * 8.0f
                     + alpha * threat
                     - beta * degree
@@ -112,6 +111,16 @@ public class MsPacMan extends PacmanController{
                         c));
 
         return bestMove;
+    }
+
+    private int edibleGhosts(Game game)
+    {
+        int count = 0;
+        for (Constants.GHOST ghost : Constants.GHOST.values())
+        {
+            if(game.isGhostEdible(ghost)) count++;
+        }
+        return count;
     }
 
     private int countAvailablePillsOnPath(Game game, int[] path)
