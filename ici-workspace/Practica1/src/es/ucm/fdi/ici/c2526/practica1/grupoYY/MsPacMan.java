@@ -20,14 +20,11 @@ public class MsPacMan extends PacmanController{
         int pacman = game.getPacmanCurrentNodeIndex();
 
         Constants.GHOST ghost = getNearestGhostToNode(Float.MAX_VALUE, pacman, game);
-        if (ghost == null)
-        {
+        if (ghost == null) {
             int nearestPill = getNearestPill(game);
-            if (nearestPill >= 0)
-            {
+            if (nearestPill >= 0) {
                 return game.getApproximateNextMoveTowardsTarget(pacman, nearestPill, game.getPacmanLastMoveMade(), Constants.DM.PATH);
-            } else
-            {
+            } else {
                 return MOVE.NEUTRAL;
             }
         }
@@ -189,13 +186,11 @@ public class MsPacMan extends PacmanController{
     }
 
 
-    private int countAvailablePillsOnPath(Game game, int[] path)
-    {
+    private int countAvailablePillsOnPath(Game game, int[] path) {
         if (path == null || path.length == 0) return 0;
 
         int count = 0;
-        for (int node : path)
-        {
+        for (int node : path) {
             int pillIndex = game.getPillIndex(node);
             if (pillIndex != -1 && Boolean.TRUE.equals(game.isPillStillAvailable(pillIndex))) count++;
             int powerPillIndex = game.getPowerPillIndex(node);
@@ -205,11 +200,9 @@ public class MsPacMan extends PacmanController{
         return count;
     }
 
-    private boolean pathHasPowerPill(int[] path, Game game)
-    {
+    private boolean pathHasPowerPill(int[] path, Game game) {
         int i = 0;
-        while (i < path.length)
-        {
+        while (i < path.length) {
             int powerPillIndex = game.getPowerPillIndex(path[i]);
             if (powerPillIndex != -1 && Boolean.TRUE.equals(game.isPowerPillStillAvailable(powerPillIndex)))
                 return true;
@@ -220,24 +213,20 @@ public class MsPacMan extends PacmanController{
         return false;
     }
 
-    private int firstJunctionFrom(int node, int parent, Game game)
-    {
+    private int firstJunctionFrom(int node, int parent, Game game) {
         int current = node;
         int prev = parent;
 
         int steps = 0;
         int maxSteps = game.getNumberOfNodes();
 
-        while (steps < maxSteps)
-        {
+        while (steps < maxSteps) {
             if (game.isJunction(current)) return current;
 
             int[] neighbours = game.getNeighbouringNodes(current);
             int next = -1;
-            for (int n : neighbours)
-            {
-                if (n != prev)
-                {
+            for (int n : neighbours) {
+                if (n != prev) {
                     next = n;
                     break;
                 }
@@ -253,14 +242,11 @@ public class MsPacMan extends PacmanController{
     }
 
 
-    private Constants.GHOST getNearestGhostToNode(float limit, int n, Game game)
-    {
+    private Constants.GHOST getNearestGhostToNode(float limit, int n, Game game) {
         Constants.GHOST nearestGhost = null;
 
-        for(Constants.GHOST ghost : Constants.GHOST.values())
-        {
-            if(game.getGhostLairTime(ghost) <= 0)
-            {
+        for(Constants.GHOST ghost : Constants.GHOST.values()) {
+            if(game.getGhostLairTime(ghost) <= 0) {
                 int ghostNode = game.getGhostCurrentNodeIndex(ghost);
                 float dis = game.getShortestPathDistance(ghostNode, n);
 
@@ -274,8 +260,7 @@ public class MsPacMan extends PacmanController{
         return nearestGhost;
     }
 
-    private int getNearestPill(Game game)
-    {
+    private int getNearestPill(Game game) {
         int pacman = game.getPacmanCurrentNodeIndex();
 
         Queue<Integer> queue = new LinkedList<>();
@@ -284,8 +269,7 @@ public class MsPacMan extends PacmanController{
         queue.add(pacman);
         visited[pacman] = true;
 
-        while (!queue.isEmpty())
-        {
+        while (!queue.isEmpty()) {
             int current = queue.poll();
 
             int pillIndex = game.getPillIndex(current);
@@ -295,10 +279,8 @@ public class MsPacMan extends PacmanController{
                 return current;
 
             int[] neighbours = game.getNeighbouringNodes(current);
-            for (int neighbour : neighbours)
-            {
-                if (!visited[neighbour])
-                {
+            for (int neighbour : neighbours) {
+                if (!visited[neighbour]) {
                     visited[neighbour] = true;
                     queue.add(neighbour);
                 }
@@ -312,14 +294,11 @@ public class MsPacMan extends PacmanController{
     {
         int closeGhosts = 0;
 
-        for (Constants.GHOST g : Constants.GHOST.values())
-        {
-            if (!game.isGhostEdible(g) && game.getGhostLairTime(g) == 0)
-            {
+        for (Constants.GHOST g : Constants.GHOST.values()) {
+            if (!game.isGhostEdible(g) && game.getGhostLairTime(g) == 0) {
                 int ghostNode = game.getGhostCurrentNodeIndex(g);
                 int dist = game.getShortestPathDistance(pacman, ghostNode);
-                if (dist > 0 && dist <= threshold)
-                {
+                if (dist > 0 && dist <= threshold) {
                     closeGhosts++;
                 }
             }
