@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedList;
 
-import org.mindswap.pellet.utils.Pair;
 import pacman.controllers.GhostController;
 import pacman.game.Constants;
 import pacman.game.Constants.GHOST;
