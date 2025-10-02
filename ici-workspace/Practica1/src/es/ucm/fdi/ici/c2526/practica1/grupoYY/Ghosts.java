@@ -26,10 +26,12 @@ public final class Ghosts extends GhostController {
     Roles[] ghostRoles = new Roles[] {Roles.first_intersection, Roles.second_intersection,
             Roles.first_intersection, Roles.second_intersection};
 
+    int[] roles_count = new int[] {2, 1, 0};
+
     Color[] ghostColors = new Color[] {Color.RED, Color.PINK, Color.BLUE, Color.ORANGE};
 
-    // TODO: calcular la interseccion a la que va el pacman
-    // TODO: intentrar predecir la siguiente interseccion a la que va a ir (rol 2)
+    int threshold_1 = 20;
+    int threshold_2 = 40;
     // TODO: alejarse del pacman y de los fantasmas comestibles si eres comestible
     // TODO: acercarse a los fantasmas no comestibles o al spawn
 
@@ -43,48 +45,39 @@ public final class Ghosts extends GhostController {
                 int pacman = game.getPacmanCurrentNodeIndex();
 
                 if(Boolean.FALSE.equals(game.isGhostEdible(ghost))){
+                    // cambio de roles
+                    if(game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), pacman, game.getGhostLastMoveMade(ghost)) <= 20
+                    && (roles_count[Roles.first_intersection.ordinal()] < 2)) {
+                        changeRole(game, ghost, Roles.first_intersection); }
+                    else if(game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), pacman, game.getGhostLastMoveMade(ghost)) <= 20
+                    && (roles_count[Roles.second_intersection.ordinal()] < 2)) {
+                        changeRole(game, ghost, Roles.second_intersection); }
+                    else if((roles_count[Roles.third_intersection.ordinal()] < 2))
+                        changeRole(game, ghost, Roles.third_intersection);
 
-                    int depth = 4;
-                    int type = 0;
-                    if(ghostRoles[ghost.ordinal()] == Roles.first_intersection) {
-                        type = 1;
-                    }
-                    else if(ghostRoles[ghost.ordinal()] == Roles.second_intersection) {
-                        type = 2;
-                    }
-                    else if(ghostRoles[ghost.ordinal()] == Roles.third_intersection){
-                        type = 3;
-                    }
+                    int depth = 4; int type = 0;
+                    if(ghostRoles[ghost.ordinal()] == Roles.first_intersection) { type = 1; }
+                    else if(ghostRoles[ghost.ordinal()] == Roles.second_intersection) { type = 2;}
+                    else if(ghostRoles[ghost.ordinal()] == Roles.third_intersection){ type = 3;}
 
                     game.getPacmanLastMoveMade();
-
                     int g = game.getGhostCurrentNodeIndex(ghost);
                     //
                     int moveNode = game.getNeighbour(pacman, game.getPacmanLastMoveMade());
 
-
-                    // esto no me gusta lol
-                    //int[] junctions = new int[0];
                     ArrayList<ArrayList<Integer>> junctions = new ArrayList<ArrayList<Integer>>();
                     MOVE lastMove = game.getPacmanLastMoveMade();
 
                     int pm = game.getPacmanCurrentNodeIndex();
                     int junction = predictPacmanTarget(game, depth, 0, pm, lastMove,  junctions);
-                    //target = junction;
-                    //int sp = game.getShortestPathDistance();
-
                     int best_junction = getBestJunction(game, junctions, type, ghost);
 
-                    if(best_junction > -1){
-                        target = best_junction;
-                    }
+                    if(best_junction > -1){ target = best_junction; }
 
                     MOVE m = game.getApproximateNextMoveTowardsTarget(g, target,
                             game.getGhostLastMoveMade(ghost), Constants.DM.PATH);
 
-                    moves.put(ghost, m);
-
-                }
+                    moves.put(ghost, m); }
                 else {
                     // si es comestible le cambia el rol, aun que probablemente no haga falta
 
@@ -114,6 +107,12 @@ public final class Ghosts extends GhostController {
 
 
         return moves;
+    }
+
+    private void changeRole(Game game, GHOST ghost, Roles role){
+        roles_count[ghostRoles[ghost.ordinal()].ordinal()]--;
+        ghostRoles[ghost.ordinal()] = role;
+        roles_count[role.ordinal()] +=1;
     }
 
     // es el metodo del jimbo methinks pero es que no me va asi que lol lmao
@@ -288,6 +287,7 @@ public final class Ghosts extends GhostController {
 
         return -2;
     }
+
 
 
     public String getName() {
