@@ -111,7 +111,7 @@ public class MsPacMan extends PacmanController{
             int ghostNode = game.getGhostCurrentNodeIndex(nearestGhost);
 
             // Distancias relevantes
-            float ghostToMoveNodeDist = game.getShortestPathDistance(ghostNode, nextNode, game.getPacmanLastMoveMade());
+            float ghostToMoveNodeDist = game.getShortestPathDistance(ghostNode, nextNode, game.getGhostLastMoveMade(nearestGhost));
             float pacmanToJunctionDist = game.getShortestPathDistance(nextNode, junctionNode, move);
             float ghostToJunctionDist = game.getShortestPathDistance(ghostNode, junctionNode);
 
