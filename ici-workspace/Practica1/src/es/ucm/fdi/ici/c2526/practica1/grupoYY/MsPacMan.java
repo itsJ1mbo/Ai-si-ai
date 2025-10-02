@@ -39,8 +39,8 @@ public class MsPacMan extends PacmanController{
                 6.0f,
                 2.5f,
                 500.0f,
-                5000.0f,
-                100.0f,
+                1000.0f,
+                200.0f,
                 pacman,
                 game);
     }
@@ -50,21 +50,21 @@ public class MsPacMan extends PacmanController{
     }
 
     /**
-     * Calcula el mejor movimiento desde la posición actual de Pac-Man hacia la intersección
-     * más favorable, basándose en una heurística que equilibra distancia, amenaza de los
-     * fantasmas, número de píldoras y posibles recompensas.
+     * Calcula el mejor movimiento desde la posicion actual de Pac-Man hacia la interseccion
+     * mas favorable, basandose en una heuristica que equilibra distancia, amenaza de los
+     * fantasmas, numero de pildoras y posibles recompensas.
      *
      * @param ghostThreatWeight             Peso aplicado al factor de amenaza de los fantasmas
-     * @param endGameThreatMultiplier       Multiplicador aplicado al peso de amenaza cuando quedan pocas píldoras
+     * @param endGameThreatMultiplier       Multiplicador aplicado al peso de amenaza cuando quedan pocas pildoras
      * @param junctionDegreeWeight          Peso que penaliza intersecciones con pocas salidas
-     * @param pathPillsWeight               Peso aplicado según la cantidad de píldoras en el camino
-     * @param endGamePillsMultiplier        Multiplicador aplicado al peso de píldoras en el late game
-     * @param nearestPillWeight             Peso que recompensa caminos más cercanos a la píldora más próxima
-     * @param endGameNearestPillMultiplier  Multiplicador aplicado al peso de la píldora más cercana en el late game
+     * @param pathPillsWeight               Peso aplicado segun la cantidad de pildoras en el camino
+     * @param endGamePillsMultiplier        Multiplicador aplicado al peso de pildoras en el late game
+     * @param nearestPillWeight             Peso que recompensa caminos mas cercanos a la pildora mas proxima
+     * @param endGameNearestPillMultiplier  Multiplicador aplicado al peso de la pildora mas cercana en el late game
      * @param powerPillPenaltyWeight        Peso que penaliza caminos peligrosos sin power pills
-     * @param edibleGhostRewardWeight       Peso que recompensa la cercanía de fantasmas comestibles
+     * @param edibleGhostRewardWeight       Peso que recompensa la cercania de fantasmas comestibles
      *
-     * @return el mejor movimiento que Pac-Man debería realizar en la intersección actual
+     * @return el mejor movimiento que Pac-Man deberia realizar en la interseccion actual
      */
     private MOVE getMoveToBestJunction(
             float ghostThreatWeight,
@@ -83,7 +83,6 @@ public class MsPacMan extends PacmanController{
         MOVE bestMove = MOVE.NEUTRAL;
 
         int chosenJunction = 0;
-        int chosenGhostNode = 0;
 
         // Posibles movimientos de Pac-Man en este cruce
         Constants.MOVE[] moves = game.getPossibleMoves(pacmanNode, game.getPacmanLastMoveMade());
@@ -91,8 +90,9 @@ public class MsPacMan extends PacmanController{
             return MOVE.NEUTRAL;
         }
 
-        // Ajuste de pesos en late game (pocas pills restantes)
-        if (game.getNumberOfActivePills() <= 30) {
+        int totalPills = game.getNumberOfPills() + game.getNumberOfPowerPills();
+        float pillRatio = (float)game.getNumberOfActivePills() / totalPills;
+        if (pillRatio < 0.3f) {
             pathPillsWeight *= endGamePillsMultiplier;
             ghostThreatWeight *= endGameThreatMultiplier;
             nearestPillWeight *= endGameNearestPillMultiplier;
@@ -100,13 +100,13 @@ public class MsPacMan extends PacmanController{
 
         for (MOVE move : moves)
         {
-            // Nodo alcanzado tras mover en esta dirección
+            // Nodo alcanzado tras mover en esta direccion
             int nextNode = game.getNeighbour(pacmanNode, move);
 
             // Primer cruce alcanzable desde este movimiento
             int junctionNode = firstJunctionFrom(nextNode, pacmanNode, game);
 
-            // Fantasma más cercano a este cruce
+            // Fantasma mas cercano a este cruce
             Constants.GHOST nearestGhost = getNearestGhostToNode(Float.MAX_VALUE, junctionNode, game);
             int ghostNode = game.getGhostCurrentNodeIndex(nearestGhost);
 
@@ -115,7 +115,7 @@ public class MsPacMan extends PacmanController{
             float pacmanToJunctionDist = game.getShortestPathDistance(nextNode, junctionNode, move);
             float ghostToJunctionDist = game.getShortestPathDistance(ghostNode, junctionNode);
 
-            // Cálculo de amenaza/recompensa por fantasmas
+            // Calculo de amenaza/recompensa por fantasmas
             float ghostThreat = 0;
             float edibleReward = 0;
             float proximityPenalty = 9.0f / (ghostToMoveNodeDist + 0.1f);
@@ -131,24 +131,24 @@ public class MsPacMan extends PacmanController{
             // Atributos del cruce
             int junctionDegree = game.getPossibleMoves(junctionNode).length - 1;
 
-            // Pills en el camino hacia el cruce
+            // Pildoras en el camino hacia el cruce
             int[] pathToJunction = game.getShortestPath(nextNode, junctionNode, move);
             int pillsOnPath = countAvailablePillsOnPath(game, pathToJunction);
 
-            // Penalización o beneficio por power pills según situación
+            // Penalizacion o beneficio por power pills segun situacion
             float powerPillPenalty = 0;
             int nearbyGhosts = nearGhostsNumber(game, 20, pacmanNode);
             if (pathHasPowerPill(pathToJunction, game)) {
-                if (nearbyGhosts < 2) {
-                    powerPillPenalty = powerPillPenaltyWeight * (nearbyGhosts % 4);
-                }
-            } else {
                 if (nearbyGhosts >= 2) {
-                    powerPillPenalty = powerPillPenaltyWeight * (nearbyGhosts % 4);
+                    // Beneficio: hay fantasmas y power pill
+                    powerPillPenalty = -powerPillPenaltyWeight * nearbyGhosts;
                 }
+            } else if (nearbyGhosts >= 2) {
+                // Penalizacion: fantasmas cerca sin power pill
+                powerPillPenalty = powerPillPenaltyWeight * nearbyGhosts;
             }
 
-            // Bonus por pill más cercana (si el camino no tiene pills)
+            // Bonus por pill mas cercana (si el camino no tiene pills)
             float nearestPillBonus = 0;
             if (pillsOnPath == 0) {
                 int nearestPillNode = getNearestPill(game);
@@ -158,7 +158,7 @@ public class MsPacMan extends PacmanController{
                 }
             }
 
-            // Heurística final
+            // Heuristica final
             float score = pacmanToJunctionDist
                     + ghostThreatWeight * ghostThreat
                     - junctionDegreeWeight * junctionDegree
@@ -167,24 +167,20 @@ public class MsPacMan extends PacmanController{
                     - nearestPillBonus
                     + powerPillPenalty;
 
-            // Si la heurística es mejor, actualizamos
+            // Si la heuristica es mejor, actualizamos
             if (score <= bestScore) {
                 bestScore = score;
                 bestMove = move;
                 chosenJunction = junctionNode;
-                chosenGhostNode = ghostNode;
             }
         }
 
-        // Visualización en pantalla
+        // Visualizacion en pantalla
         GameView.addPoints(game, Color.yellow,
                 game.getShortestPath(chosenJunction, game.getPacmanCurrentNodeIndex()));
-        GameView.addPoints(game, Color.red,
-                game.getShortestPath(chosenGhostNode, chosenJunction));
 
         return bestMove;
     }
-
 
     private int countAvailablePillsOnPath(Game game, int[] path) {
         if (path == null || path.length == 0) return 0;
