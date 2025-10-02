@@ -19,11 +19,12 @@ public final class Ghosts extends GhostController {
     enum Roles {
         first_intersection,
         second_intersection,
+        third_intersection,
         run_away
     }
 
-    Roles[] ghostRoles = new Roles[] {Roles.first_intersection, Roles.first_intersection,
-            Roles.first_intersection, Roles.first_intersection};
+    Roles[] ghostRoles = new Roles[] {Roles.first_intersection, Roles.second_intersection,
+            Roles.first_intersection, Roles.second_intersection};
 
     Color[] ghostColors = new Color[] {Color.RED, Color.PINK, Color.BLUE, Color.ORANGE};
 
@@ -42,42 +43,51 @@ public final class Ghosts extends GhostController {
                 int pacman = game.getPacmanCurrentNodeIndex();
 
                 if(Boolean.FALSE.equals(game.isGhostEdible(ghost))){
+
+                    int depth = 4;
+                    int type = 0;
                     if(ghostRoles[ghost.ordinal()] == Roles.first_intersection) {
-                        game.getPacmanLastMoveMade();
-
-                        int g = game.getGhostCurrentNodeIndex(ghost);
-                        //
-                        int moveNode = game.getNeighbour(pacman, game.getPacmanLastMoveMade());
-
-
-                        // esto no me gusta lol
-                        //int[] junctions = new int[0];
-                        ArrayList<ArrayList<Integer>> junctions = new ArrayList<ArrayList<Integer>>();
-                        MOVE lastMove = game.getPacmanLastMoveMade();
-
-                        int pm = game.getPacmanCurrentNodeIndex();
-                        int junction = predictPacmanTarget(game, 3, 0, pm, lastMove,  junctions);
-                        //target = junction;
-                        //int sp = game.getShortestPathDistance();
-
-                        //int best_junction = getBestJunction(game, junctions, 2, ghost);
-                        //target = best_junction;
-                        MOVE m = game.getApproximateNextMoveTowardsTarget(g, target,
-                                game.getGhostLastMoveMade(ghost), Constants.DM.PATH);
-
-                        moves.put(ghost, m);
+                        type = 1;
                     }
-                    else{
-                        moves.put(ghost, MOVE.NEUTRAL);
-
+                    else if(ghostRoles[ghost.ordinal()] == Roles.second_intersection) {
+                        type = 2;
                     }
+                    else if(ghostRoles[ghost.ordinal()] == Roles.third_intersection){
+                        type = 3;
+                    }
+
+                    game.getPacmanLastMoveMade();
+
+                    int g = game.getGhostCurrentNodeIndex(ghost);
+                    //
+                    int moveNode = game.getNeighbour(pacman, game.getPacmanLastMoveMade());
+
+
+                    // esto no me gusta lol
+                    //int[] junctions = new int[0];
+                    ArrayList<ArrayList<Integer>> junctions = new ArrayList<ArrayList<Integer>>();
+                    MOVE lastMove = game.getPacmanLastMoveMade();
+
+                    int pm = game.getPacmanCurrentNodeIndex();
+                    int junction = predictPacmanTarget(game, depth, 0, pm, lastMove,  junctions);
+                    //target = junction;
+                    //int sp = game.getShortestPathDistance();
+
+                    int best_junction = getBestJunction(game, junctions, type, ghost);
+
+                    if(best_junction > -1){
+                        target = best_junction;
+                    }
+
+                    MOVE m = game.getApproximateNextMoveTowardsTarget(g, target,
+                            game.getGhostLastMoveMade(ghost), Constants.DM.PATH);
+
+                    moves.put(ghost, m);
 
                 }
                 else {
                     // si es comestible le cambia el rol, aun que probablemente no haga falta
-                    if(ghostRoles[ghost.ordinal()] != Roles.run_away) {
-                        ghostRoles[ghost.ordinal()] = Roles.run_away;
-                    }
+
 
                     // de momento solo se aleja del pacman
                     MOVE away = game.getNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
@@ -114,10 +124,10 @@ public final class Ghosts extends GhostController {
         if(count >= depth-1){
             return 0;
         }
-
         if(initialNode == -1){
             return 0;
         }
+
         boolean aux = game.isJunction(initialNode);
 
         MOVE[] moves = game.getPossibleMoves(initialNode, lastMove);
@@ -133,7 +143,8 @@ public final class Ghosts extends GhostController {
         // -------------------------- TARGET ---------------------------------
         // recorre los movimientos posibles para encontrar la interseccion final
         for(MOVE move : moves){
-            int junct = getNextJunction(game, current, move);
+            int junct = firstJunctionFrom(game.getNeighbour(initialNode, move), initialNode, game);
+                    //getNextJunction(game, current, move);
             list.add(junct);
             move_list.add(move);
 
@@ -226,10 +237,11 @@ public final class Ghosts extends GhostController {
             //return game.getPacmanCurrentNodeIndex();
         }
 
+        ArrayList<Integer> list = junctions.get(junctions.size() - depth);
 
-        ArrayList<Integer> list = junctions.get(depth - 1);
-
-
+        if(list.size() == 0){
+            return -1;
+        }
         junct = list.getFirst();
         shortest_dist = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), junct);
 
@@ -244,7 +256,7 @@ public final class Ghosts extends GhostController {
 
         return junct;
     }
-    // guarrada de placeholder
+
     private int firstJunctionFrom(int node, int parent, Game game)
     {
         int current = node;
@@ -274,10 +286,9 @@ public final class Ghosts extends GhostController {
             steps++;
         }
 
-        int i = 0;
-
         return -2;
     }
+
 
     public String getName() {
     	return "GhostsNeutral";
