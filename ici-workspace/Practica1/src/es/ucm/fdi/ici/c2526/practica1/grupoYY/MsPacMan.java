@@ -32,14 +32,14 @@ public class MsPacMan extends PacmanController{
         if (!game.isJunction(pacman)) return MOVE.NEUTRAL;
 
         return getMoveToBestJunction(
-                50.0f,
+                500.0f,
                 0.5f,
                 1.2f,
-                8.0f,
+                100.0f,
                 6.0f,
-                2.5f,
-                500.0f,
+                1.5f,
                 1000.0f,
+                2000.0f,
                 200.0f,
                 pacman,
                 game);
