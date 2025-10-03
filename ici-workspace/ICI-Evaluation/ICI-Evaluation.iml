@@ -10,5 +10,7 @@
     <orderEntry type="module" module-name="MsPacManEngine" />
     <orderEntry type="module" module-name="Practica1" />
     <orderEntry type="module" module-name="Practica0" />
+    <orderEntry type="library" name="ici-2425-practica1" level="project" />
+    <orderEntry type="library" name="ici-2425-practica2" level="project" />
   </component>
 </module>

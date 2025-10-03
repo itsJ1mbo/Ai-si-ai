@@ -3,6 +3,7 @@ import pacman.controllers.GhostController;
 //import pacman.controllers.HumanController;
 //import pacman.controllers.KeyBoardInput;
 import pacman.controllers.PacmanController;
+import es.ucm.fdi.ici.c2425.practica1.grupo08.Ghosts;
 
 /*	ICI HALL-OF-FAME
 
@@ -46,7 +47,7 @@ public class ExecutorTest {
 
         //PacmanController pacMan = new pacman.controllers.HumanController.HumanController(new pacman.controllers.HumanController.KeyBoardInput());
         PacmanController pacMan = new es.ucm.fdi.ici.c2526.practica1.grupoB.MsPacMan();
-        GhostController ghosts = new es.ucm.fdi.ici.c2526.practica1.grupoB.Ghosts();
+        GhostController ghosts = new es.ucm.fdi.ici.c2425.practica1.grupo02.Ghosts();
         
         System.out.println( 
             executor.runGame(pacMan, ghosts, 30) //last parameter defines speed

@@ -44,7 +44,7 @@ public class MsPacMan extends PacmanController{
     }
     
     public String getName() {
-    	return "MsPacManGrupoB";
+    	return "MsPacMan Womp Womp";
     }
 
     /**
@@ -62,7 +62,7 @@ public class MsPacMan extends PacmanController{
      * @param powerPillPenaltyWeight        Peso que penaliza caminos peligrosos sin power pills
      * @param edibleGhostRewardWeight       Peso que recompensa la cercania de fantasmas comestibles
      *
-     * @return el mejor movimiento que Pac-Man deberia realizar en la interseccion actual
+     * @return El mejor movimiento que Pac-Man deberia realizar en la interseccion actual
      */
     private MOVE getMoveToBestJunction(
             float ghostThreatWeight,
@@ -180,6 +180,13 @@ public class MsPacMan extends PacmanController{
         return bestMove;
     }
 
+    /**
+     * Cuenta las pills que hay en una camino
+     *
+     * @param path El camino de nodos en el que busca
+     *
+     * @return El numero de pills en el camino
+     */
     private int countAvailablePillsOnPath(Game game, int[] path) {
         if (path == null || path.length == 0) return 0;
 
@@ -194,6 +201,13 @@ public class MsPacMan extends PacmanController{
         return count;
     }
 
+    /**
+     * Comprueba si en el camino dado hay una power pill
+     *
+     * @param path Camino en el que busca una power pill
+     *
+     * @return True si encuentra, false en caso contrario
+     */
     private boolean pathHasPowerPill(int[] path, Game game) {
         int i = 0;
         while (i < path.length) {
@@ -207,6 +221,14 @@ public class MsPacMan extends PacmanController{
         return false;
     }
 
+    /**
+     * Busca la primera interseccion desde el nodo dado
+     *
+     * @param node Nodo desde el que busca
+     * @param parent Padre del nodo para evitar buscar por donde viene el pacman
+
+     * @return El id del nodo de la interseccion
+     */
     private int firstJunctionFrom(int node, int parent, Game game) {
         int current = node;
         int prev = parent;
@@ -235,7 +257,14 @@ public class MsPacMan extends PacmanController{
         return -2;
     }
 
-
+    /**
+     * Busca el fantasma mas cercano a un nodo dado segun un limite
+     *
+     * @param limit Limite a partir del que encuentra
+     * @param n El nodo
+     *
+     * @return El fantasma mas cercano
+     */
     private Constants.GHOST getNearestGhostToNode(float limit, int n, Game game) {
         Constants.GHOST nearestGhost = null;
 
@@ -254,6 +283,11 @@ public class MsPacMan extends PacmanController{
         return nearestGhost;
     }
 
+    /**
+     * Busca la pill mas cercana al pacman
+     *
+     * @return El id del nodo de la pill
+     */
     private int getNearestPill(Game game) {
         int pacman = game.getPacmanCurrentNodeIndex();
 
@@ -284,7 +318,15 @@ public class MsPacMan extends PacmanController{
         return -2;
     }
 
-    private int nearGhostsNumber(Game game, int threshold, int pacman)
+    /**
+     * Busca la cantidad de fantasmas cercanos al pacman
+     *
+     * @param limit Limite a partir del que encuentra fantasmas
+     * @param pacman Nodo del pacman
+     *
+     * @return Cantidad de fantasmas cercanos
+     */
+    private int nearGhostsNumber(Game game, int limit, int pacman)
     {
         int closeGhosts = 0;
 
@@ -292,7 +334,7 @@ public class MsPacMan extends PacmanController{
             if (!game.isGhostEdible(g) && game.getGhostLairTime(g) == 0) {
                 int ghostNode = game.getGhostCurrentNodeIndex(g);
                 int dist = game.getShortestPathDistance(pacman, ghostNode);
-                if (dist > 0 && dist <= threshold) {
+                if (dist > 0 && dist <= limit) {
                     closeGhosts++;
                 }
             }

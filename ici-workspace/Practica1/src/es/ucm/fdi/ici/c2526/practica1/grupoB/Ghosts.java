@@ -184,7 +184,10 @@ public final class Ghosts extends GhostController {
 
     private int firstJunctionFrom(int node, int parent, Game game)
     {
-        int current = node; int prev = parent; int steps = 0; int maxSteps = game.getNumberOfNodes();
+        int current = node;
+        int prev = parent;
+        int steps = 0;
+        int maxSteps = game.getNumberOfNodes();
 
         while (steps < maxSteps)
         {
@@ -205,6 +208,6 @@ public final class Ghosts extends GhostController {
     }
 
     public String getName() {
-    	return "GhostsGrupoB";
+    	return "FantaDeNaranja";
     }
 }
