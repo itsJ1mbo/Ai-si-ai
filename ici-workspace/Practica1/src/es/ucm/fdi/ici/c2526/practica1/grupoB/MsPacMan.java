@@ -96,8 +96,7 @@ public class MsPacMan extends PacmanController{
             nearestPillWeight *= endGameNearestPillMultiplier;
         }
 
-        for (MOVE move : moves)
-        {
+        for (MOVE move : moves) {
             // Nodo alcanzado tras mover en esta direccion
             int nextNode = game.getNeighbour(pacmanNode, move);
 
@@ -326,8 +325,7 @@ public class MsPacMan extends PacmanController{
      *
      * @return Cantidad de fantasmas cercanos
      */
-    private int nearGhostsNumber(Game game, int limit, int pacman)
-    {
+    private int nearGhostsNumber(Game game, int limit, int pacman) {
         int closeGhosts = 0;
 
         for (Constants.GHOST g : Constants.GHOST.values()) {
