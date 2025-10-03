@@ -140,6 +140,10 @@ public class MsPacMan extends PacmanController{
                     // Beneficio: hay fantasmas y power pill
                     powerPillPenalty = -powerPillPenaltyWeight * nearbyGhosts;
                 }
+                else {
+                    // Penalizacion: fantasmas cerca sin power pill
+                    powerPillPenalty = powerPillPenaltyWeight;
+                }
             } else if (nearbyGhosts >= 2) {
                 // Penalizacion: fantasmas cerca sin power pill
                 powerPillPenalty = powerPillPenaltyWeight * nearbyGhosts;

@@ -50,7 +50,7 @@ public class ExecutorTest {
         //GhostController ghosts = new es.ucm.fdi.ici.c2526.practica1.grupoB.Ghosts();
 
         PacmanController pacMan = new es.ucm.fdi.ici.c2526.practica1.grupoB.MsPacMan();
-        GhostController ghosts = new es.ucm.fdi.ici.c2526.practica1.grupoK.Ghosts();
+        GhostController ghosts = new es.ucm.fdi.ici.c2526.practica1.grupoL.Ghosts();
         
         System.out.println( 
             executor.runGame(pacMan, ghosts, 30) //last parameter defines speed
