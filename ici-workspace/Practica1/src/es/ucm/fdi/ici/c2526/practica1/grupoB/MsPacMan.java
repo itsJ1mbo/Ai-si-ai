@@ -1,16 +1,14 @@
-package es.ucm.fdi.ici.c2526.practica1.grupoYY;
+package es.ucm.fdi.ici.c2526.practica1.grupoB;
 
 import pacman.controllers.PacmanController;
 import pacman.game.Constants;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 import pacman.game.GameView;
-import pacman.game.internal.Ghost;
 
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Stack;
 
 public class MsPacMan extends PacmanController{
 
@@ -46,7 +44,7 @@ public class MsPacMan extends PacmanController{
     }
     
     public String getName() {
-    	return "MsPacManNeutral";
+    	return "MsPacManGrupoB";
     }
 
     /**

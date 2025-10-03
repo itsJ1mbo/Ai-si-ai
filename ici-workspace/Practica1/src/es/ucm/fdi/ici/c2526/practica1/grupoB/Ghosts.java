@@ -1,10 +1,8 @@
-package es.ucm.fdi.ici.c2526.practica1.grupoYY;
+package es.ucm.fdi.ici.c2526.practica1.grupoB;
 
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.LinkedList;
 
 import pacman.controllers.GhostController;
 import pacman.game.Constants;
@@ -207,6 +205,6 @@ public final class Ghosts extends GhostController {
     }
 
     public String getName() {
-    	return "GhostsNeutral";
+    	return "GhostsGrupoB";
     }
 }
