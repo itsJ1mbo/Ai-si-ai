@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Practica1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/Practica1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/ICI-Evaluation/lib/Practica1.jar!/" />
+    </SOURCES>
+  </library>
+</component>
