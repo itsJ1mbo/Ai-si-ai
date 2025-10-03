@@ -44,7 +44,7 @@ public class MsPacMan extends PacmanController{
     }
     
     public String getName() {
-    	return "MsPacMan Womp Womp";
+    	return "ADG MsPacMan";
     }
 
     /**

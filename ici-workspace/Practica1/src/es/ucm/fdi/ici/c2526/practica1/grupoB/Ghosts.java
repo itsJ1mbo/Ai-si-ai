@@ -208,6 +208,6 @@ public final class Ghosts extends GhostController {
     }
 
     public String getName() {
-    	return "FantaDeNaranja";
+    	return "ADG Ghosts";
     }
 }
