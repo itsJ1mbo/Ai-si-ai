@@ -28,7 +28,7 @@ public final class Ghosts extends GhostController {
     int[] followed_ghosts = new int[] {0, 0, 0, 0};
     Color[] ghostColors = new Color[] {Color.RED, Color.PINK, Color.BLUE, Color.ORANGE};
 
-    int threshold_1 = 10;
+    int threshold_1 = 7;
     int threshold_2 = 20;
 
     @Override
