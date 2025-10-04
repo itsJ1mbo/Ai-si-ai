@@ -28,10 +28,8 @@ public final class Ghosts extends GhostController {
     int[] followed_ghosts = new int[] {0, 0, 0, 0};
     Color[] ghostColors = new Color[] {Color.RED, Color.PINK, Color.BLUE, Color.ORANGE};
 
-    int threshold_1 = 20;
-    int threshold_2 = 40;
-    // TODO: alejarse del pacman y de los fantasmas comestibles si eres comestible
-    // TODO: acercarse a los fantasmas no comestibles o al spawn
+    int threshold_1 = 10;
+    int threshold_2 = 20;
 
     @Override
     public EnumMap<GHOST, MOVE> getMove(Game game, long timeDue) {
@@ -44,10 +42,10 @@ public final class Ghosts extends GhostController {
 
                 if(Boolean.FALSE.equals(game.isGhostEdible(ghost))){
                     // cambio de roles
-                    if(game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), pacman, game.getGhostLastMoveMade(ghost)) <= 20
+                    if(game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), pacman, game.getGhostLastMoveMade(ghost)) <= threshold_1
                     && (roles_count[Roles.first_intersection.ordinal()] < 2)) {
                         changeRole(game, ghost, Roles.first_intersection); }
-                    else if(game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), pacman, game.getGhostLastMoveMade(ghost)) <= 20
+                    else if(game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost), pacman, game.getGhostLastMoveMade(ghost)) <= threshold_2
                     && (roles_count[Roles.second_intersection.ordinal()] < 2)) {
                         changeRole(game, ghost, Roles.second_intersection); }
                     else if((roles_count[Roles.third_intersection.ordinal()] < 2))
@@ -129,6 +127,13 @@ public final class Ghosts extends GhostController {
         return moves;
     }
 
+    /**
+     *
+     * @param game          referencia al juego
+     * @param this_ghost    el fantasma desde el que estamos calculando
+     * @param edible_count  contador con fantasmas comestibles
+     * @return              el fantasma mas cercano no comestible, si no hay devuelve null
+     */
     private GHOST getClosestNonEdibleGhost(Game game, GHOST this_ghost, Integer edible_count) {
         int distance = Integer.MAX_VALUE; GHOST g = null;
         for (GHOST ghost : GHOST.values()){
@@ -140,6 +145,12 @@ public final class Ghosts extends GhostController {
         return g;
     }
 
+    /**
+     *
+     * @param game          referencia al game
+     * @param this_ghost    el fantasma desde el que estamos calculando
+     * @return              el fantasma mas cercano comestible, si no hay devuelve null
+     */
     private GHOST getClosestEdibleGhost(Game game, GHOST this_ghost){
         int distance = Integer.MAX_VALUE;
         GHOST g = null;
@@ -153,11 +164,27 @@ public final class Ghosts extends GhostController {
 
     }
 
+    /**
+     *
+     * @param game          referencia al juego
+     * @param ghost         fantasma que quieras cambiar de rol
+     * @param role          el nuevo rol
+     */
     private void changeRole(Game game, GHOST ghost, Roles role){
         roles_count[ghostRoles[ghost.ordinal()].ordinal()]--;
         ghostRoles[ghost.ordinal()] = role;
         roles_count[role.ordinal()] +=1; }
 
+    /**
+     *
+     * @param game          referencia al juego
+     * @param depth         la 'profundiad' de la busqueda (cuantas intersecciones hacia delante quieres mirar)
+     * @param count         contador de la interseccion por la que va, si es el primero poned 0
+     * @param initialNode   nodo inicial desde el que se quiere calcular
+     * @param lastMove      ultimo movimiento del bicho (no tiene por que ser el pacman)
+     * @param junctions     arrayList de arrayList que pasa los nodos de las posibles intersecciones segun la profundidad
+     * @return
+     */
     private int predictPacmanTarget(Game game, int depth, int count, int initialNode, MOVE lastMove,
                                     ArrayList<ArrayList<Integer>> junctions) {
         if(count >= depth-1){ return 0; }
@@ -183,6 +210,14 @@ public final class Ghosts extends GhostController {
         return 0;
     }
 
+    /**
+     *
+     * @param game          referencia al juego
+     * @param junctions     arrayList de arrayList con las intersecciones por profundidad
+     * @param depth         profundidad a la que se quiera ir
+     * @param ghost         fantasma desde el que estamos calculando
+     * @return
+     */
     private int getBestJunction(Game game, ArrayList<ArrayList<Integer>> junctions,
                                 int depth, GHOST ghost){
         int junct = 0; int shortest_dist = 0;

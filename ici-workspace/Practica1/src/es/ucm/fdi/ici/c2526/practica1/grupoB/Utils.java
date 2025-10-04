@@ -1,4 +1,4 @@
-﻿package es.ucm.fdi.ici.c2526.practica1.grupoB;
+package es.ucm.fdi.ici.c2526.practica1.grupoB;
 
 import pacman.game.Game;
 
