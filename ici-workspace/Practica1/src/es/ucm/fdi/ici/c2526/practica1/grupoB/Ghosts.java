@@ -2,6 +2,7 @@ package es.ucm.fdi.ici.c2526.practica1.grupoB;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 
 import pacman.controllers.GhostController;
@@ -60,9 +61,33 @@ public final class Ghosts extends GhostController {
                     int g = game.getGhostCurrentNodeIndex(ghost);
                     ArrayList<ArrayList<Integer>> junctions = new ArrayList<ArrayList<Integer>>();
                     MOVE lastMove = game.getPacmanLastMoveMade();
-                    int result = predictPacmanTarget(game, depth, 0, pacman, lastMove,  junctions);
-                    int best_junction = getBestJunction(game, junctions, type, ghost);
-                    if(best_junction > -1){ target = best_junction; }
+
+                    // busca si hay algun fantasma comestible
+                    GHOST closest_edible_ghost = null;
+                    int closest_dist = Integer.MAX_VALUE;
+                    for(GHOST is_g_edible : GHOST.values()){
+                        if(Boolean.TRUE.equals(game.isGhostEdible(is_g_edible))) {
+                            int aux_dist = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost),
+                                    game.getGhostCurrentNodeIndex(is_g_edible),
+                                    game.getGhostLastMoveMade(ghost));
+                            if(aux_dist < closest_dist){
+                                closest_dist = aux_dist;
+                                closest_edible_ghost = is_g_edible;
+                            }
+                        }
+                    }
+                    // resetta el array
+                    if(closest_edible_ghost == null){ Arrays.fill(followed_ghosts, 0); }
+
+                    if(closest_edible_ghost != null && followed_ghosts[closest_edible_ghost.ordinal()] == 0){
+                        followed_ghosts[closest_edible_ghost.ordinal()] = 1;
+                        target = game.getGhostCurrentNodeIndex(closest_edible_ghost);
+                    }
+                    else {
+                        int result = predictPacmanTarget(game, depth, 0, pacman, lastMove,  junctions);
+                        int best_junction = getBestJunction(game, junctions, type, ghost);
+                        if(best_junction > -1) { target = best_junction; }
+                    }
 
                     MOVE m = game.getApproximateNextMoveTowardsTarget(g, target,
                             game.getGhostLastMoveMade(ghost), Constants.DM.PATH);
@@ -85,7 +110,7 @@ public final class Ghosts extends GhostController {
                         away = game.getNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
                                 game.getGhostCurrentNodeIndex(g), Constants.DM.PATH); }
                     else{
-                        game.getNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
+                        away = game.getNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
                                 game.getGhostCurrentNodeIndex(g), Constants.DM.PATH); }
 
                     moves.put(ghost, away);
@@ -98,8 +123,7 @@ public final class Ghosts extends GhostController {
                         ghostColors[ghost.ordinal()],
                         game.getShortestPath(
                                 game.getGhostCurrentNodeIndex(ghost),
-                                target));
-            }
+                                target));}
 
         }
         return moves;
