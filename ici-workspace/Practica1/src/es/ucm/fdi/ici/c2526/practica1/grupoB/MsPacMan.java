@@ -101,7 +101,7 @@ public class MsPacMan extends PacmanController{
             int nextNode = game.getNeighbour(pacmanNode, move);
 
             // Primer cruce alcanzable desde este movimiento
-            int junctionNode = firstJunctionFrom(nextNode, pacmanNode, game);
+            int junctionNode = Utils.firstJunctionFrom(nextNode, pacmanNode, game);
 
             // Fantasma mas cercano a este cruce
             Constants.GHOST nearestGhost = getNearestGhostToNode(Float.MAX_VALUE, junctionNode, game);
@@ -222,42 +222,6 @@ public class MsPacMan extends PacmanController{
         }
 
         return false;
-    }
-
-    /**
-     * Busca la primera interseccion desde el nodo dado
-     *
-     * @param node Nodo desde el que busca
-     * @param parent Padre del nodo para evitar buscar por donde viene el pacman
-
-     * @return El id del nodo de la interseccion
-     */
-    private int firstJunctionFrom(int node, int parent, Game game) {
-        int current = node;
-        int prev = parent;
-
-        int steps = 0;
-        int maxSteps = game.getNumberOfNodes();
-
-        while (steps < maxSteps) {
-            if (game.isJunction(current)) return current;
-
-            int[] neighbours = game.getNeighbouringNodes(current);
-            int next = -1;
-            for (int n : neighbours) {
-                if (n != prev) {
-                    next = n;
-                    break;
-                }
-            }
-
-            prev = current;
-            current = next;
-
-            steps++;
-        }
-
-        return -2;
     }
 
     /**

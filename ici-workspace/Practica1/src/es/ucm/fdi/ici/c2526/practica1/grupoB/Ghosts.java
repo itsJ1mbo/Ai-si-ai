@@ -170,7 +170,7 @@ public final class Ghosts extends GhostController {
         // -------------------------- TARGET ---------------------------------
         // recorre los movimientos posibles para encontrar la interseccion final
         for(MOVE move : moves){
-            int junct = firstJunctionFrom(game.getNeighbour(initialNode, move), initialNode, game);
+            int junct = Utils.firstJunctionFrom(game.getNeighbour(initialNode, move), initialNode, game);
                     //getNextJunction(game, current, move);
             list.add(junct);
             move_list.add(move);
@@ -206,30 +206,6 @@ public final class Ghosts extends GhostController {
         return junct;
     }
 
-    private int firstJunctionFrom(int node, int parent, Game game)
-    {
-        int current = node;
-        int prev = parent;
-        int steps = 0;
-        int maxSteps = game.getNumberOfNodes();
-
-        while (steps < maxSteps)
-        {
-            if (game.isJunction(current)) return current;
-
-            int[] neighbours = game.getNeighbouringNodes(current);
-            int next = -1;
-            for (int n : neighbours)
-            {
-                if (n != prev) { next = n; break; }
-            }
-            prev = current;
-            current = next;
-
-            steps++;
-        }
-        return -2;
-    }
 
     public String getName() {
     	return "ADG Ghosts";
